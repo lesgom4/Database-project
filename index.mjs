@@ -13,10 +13,10 @@ app.use(express.urlencoded({extended:true}));
 
 //setting up database connection pool, replace values in red
 const pool = mysql.createPool({
-    host: "d13xat1hwxt21t45.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
-    user: "lru868rp8ryaeke3",
-    password: "mf9p2q7r3opq7lwg",
-    database: "vnujnm2vqpohwi0e",
+    host: "e11wl4mksauxgu1w.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
+    user: "zi149p4frap6nx7f",
+    password: "un1jpam7csvxvn70",
+    database: "vkestfncqsoesm0v",
     connectionLimit: 10,
     waitForConnections: true
 });
@@ -24,7 +24,7 @@ const pool = mysql.createPool({
 //initialize this server app to use sessions
 app.set('trust proxy', 1) // trust first proxy
 app.use(session({
-    secret: 'keyboard-cat',
+    secret: 'baking-is-my-passion',
     resave: false,
     saveUninitialized: true,
 }));
@@ -50,7 +50,7 @@ app.post('/login', async (req, res) => {
     //select the user that matches the username 
     //typed in the form
     let checkUserQuery = 
-    `SELECT * FROM admin 
+    `SELECT * FROM Login 
     WHERE username = ?`;
 
     let params = [username];
@@ -62,7 +62,7 @@ app.post('/login', async (req, res) => {
          && await bcrypt.compare(password, rows[0].password)) {    
         
         req.session.authenticated = true;
-        req.session.role = 'admin';
+        req.session.role = rows[0].type;
         req.session.username = username;
         
         res.render('home.ejs');
@@ -78,15 +78,15 @@ app.post('/login', async (req, res) => {
     //to the quotes list
 })
 
-app.get('/newUser', (req, res) => {
-    res.render('newUser.ejs');
+app.get('/signup', (req, res) => {
+    res.render('signup.ejs');
 })
 
 app.post('/createUser', async (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
 
-    let createUserSql = `INSERT INTO admin (username, password) 
+    let createUserSql = `INSERT INTO Login (username, password) 
                VALUES (?, ?)`;
 
     let hashedPassword = await bcrypt.hash(password, 10);
@@ -98,13 +98,13 @@ app.post('/createUser', async (req, res) => {
 
 });
 
-app.get('/quotesList', isUserAuthenticated, async (req, res) => {
+app.get('/menu', isUserAuthenticated, async (req, res) => {
 
-    let query = 'SELECT * FROM quotes';
+    let query = 'SELECT * FROM menu';
     const [rows] = await pool.query(query);
     console.log(rows);
     
-    res.render('quotes.ejs', {quotes: rows});
+    res.render('menu.ejs', {menu: rows});
     
 });
 
